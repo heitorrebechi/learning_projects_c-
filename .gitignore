@@ -1,0 +1,7 @@
+*.exe
+*.o
+*.out
+.claude/
+
+# Contains real personal data (names, phone numbers, emails) - keep private
+contactsProject/contacts.txt
