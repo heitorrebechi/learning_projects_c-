@@ -9,17 +9,22 @@ string Student::getName() const{
 string Student::getBirthDate() const{
     return birthDate;
 }
-unordered_map<int, map<int, Grade>> Student::getGrades() const{
+unordered_map<Subject, map<int, Grade>> Student::getGrades() const{
     return grades;
 }
-void Student::addGrade(int sjId, int testNum, Grade g){
+void Student::addGrade(Subject sj, int testNum, Grade g){
 
-    grades[sjId].insert({testNum, g});
+    grades[sj].insert({testNum, g});
 
 }
-void Student::removeGrade(int sjId, int testNum){
+void Student::removeGrade(Subject sj, int testNum){
 
-    grades[sjId].erase(testNum);
+    grades[sj].erase(testNum);
+
+}
+void Student::updateGrade(Subject sj, int testNum, Grade newGrade){
+
+    grades[sj][testNum] = newGrade;
 
 }
 double Student::getAverage() const{

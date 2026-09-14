@@ -21,6 +21,7 @@ int main(){
                 gradeMngMenu(students, subjects);
                 break;
             case 4:
+                studentReportMenu(students, subjects);
                 break;
             case 5:
                 break;
@@ -450,6 +451,7 @@ void gradeMngMenu(vector<Student>& students, vector<Subject>& subjects){
         cout << "==========================" << endl;
         cout << "1. Add grade" << endl;
         cout << "2. Remove a grade" << endl;
+        cout << "3. Update grade" << endl;
         cout << "0. Exit" << endl;
         cout << "==========================" << endl;
 
@@ -463,7 +465,7 @@ void gradeMngMenu(vector<Student>& students, vector<Subject>& subjects){
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cout << "Invalid Option" << endl;
             }
-            else if(option < 0 || option > 2){
+            else if(option < 0 || option > 3){
                 cout << "Invalid Option" << endl;
             }
             else{
@@ -478,6 +480,9 @@ void gradeMngMenu(vector<Student>& students, vector<Subject>& subjects){
                 break;
             case 2:
                 removeGrade(students, subjects);
+                break;
+            case 3:
+                updateGrade(students, subjects);
                 break;
             case 0:
                 return;
@@ -508,9 +513,9 @@ void addGrade(vector<Student>& students, vector<Subject>& subjects){
     }
 
     int sjId = sj->getId();
-    unordered_map<int, map<int, Grade>> stGrades = st->getGrades();
+    unordered_map<Subject, map<int, Grade>> stGrades = st->getGrades();
     int testNum;
-    auto sjIt = stGrades.find(sjId);
+    auto sjIt = stGrades.find(*sj);
     if(sjIt == stGrades.end()){ // Subject not assigned
 
         testNum = 1;
@@ -525,7 +530,7 @@ void addGrade(vector<Student>& students, vector<Subject>& subjects){
             return;
         }
 
-        testNum = getTestNum(testGrades, true);
+        testNum = getTestNum(testGrades, 1);
 
         if(testNum == 0){
             return;
@@ -572,7 +577,7 @@ void addGrade(vector<Student>& students, vector<Subject>& subjects){
 
     Grade g(sjId, score, testDate);
 
-    st->addGrade(sjId, testNum, g);
+    st->addGrade(*sj, testNum, g);
 
     cout << "Grade assigned" << endl;
 
@@ -603,20 +608,20 @@ void removeGrade(vector<Student>& students, vector<Subject>& subjects){
     }
 
     int sjId = sj->getId();
-    unordered_map<int, map<int, Grade>> stGrades = st->getGrades();
+    unordered_map<Subject, map<int, Grade>> stGrades = st->getGrades();
     
-    auto sjIt = stGrades.find(sjId);
+    auto sjIt = stGrades.find(*sj);
     map<int, Grade> testGrades = sjIt->second;
 
     int testNum;
     while(true){
-        testNum = getTestNum(testGrades, false);
+        testNum = getTestNum(testGrades, 2);
         if(testNum == 0){
             return;
         }
 
-        auto testIt = stGrades[sjId].find(testNum);
-        if(testIt == stGrades[sjId].end()){
+        auto testIt = stGrades[*sj].find(testNum);
+        if(testIt == stGrades[*sj].end()){
             cout << "Test not found within subject" << endl;
         }
         else{
@@ -624,9 +629,106 @@ void removeGrade(vector<Student>& students, vector<Subject>& subjects){
         }
     }
 
-    st->removeGrade(sjId, testNum);
+    st->removeGrade(*sj, testNum);
 
     cout << "Grade removed" << endl;
+
+}
+void updateGrade(vector<Student>& students, vector<Subject>& subjects){
+
+    if(students.empty()){
+        cout << "There are no students" << endl;
+        return;
+    }
+    
+    if(subjects.empty()){
+        cout << "There are no subjects" << endl;
+        return;
+    }
+
+    Student* st;
+    if(!studentIdInput(students, st)){
+        return;
+    }
+
+    if(st->getGrades().empty()){
+        cout << "The student have no grades assigned" << endl;
+        return;
+    }
+
+    Subject* sj;
+    if(!subjectIdInput(subjects, sj)){
+        return;
+    }
+
+    int sjId = sj->getId();
+    unordered_map<Subject, map<int, Grade>> stGrades = st->getGrades();
+
+    auto sjIt = stGrades.find(*sj);
+    map<int, Grade> testGrades = sjIt->second;
+    if(testGrades.empty()){
+        cout << "The student doesn't have any grades assigned for this subject" << endl;
+        return;
+    }
+
+    int testNum;
+    while(true){
+        testNum = getTestNum(testGrades, 3);
+
+        if(testNum == 0){
+            return;
+        }
+
+        auto testIt = stGrades[*sj].find(testNum);
+        if(testIt == stGrades[*sj].end()){
+            cout << "Test not found" << endl;
+        }
+        else{
+            break;
+        }
+    }
+
+    int newScore;
+    while(true){
+        cout << "Enter the test new score: ";
+        cin >> newScore;
+
+        if(cin.fail()){
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid score" << endl;
+        }
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if(newScore < 0 || newScore > 10){
+            cout << "Score must be between 0-10" << endl;
+        }
+        else{
+            break;
+        }
+    }
+
+    string newDate;
+    while(true){
+        cout << "Enter the test new date: ";
+        cin >> newDate;
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if(!isValidDate(newDate)){
+            cout << "Invalid Date" << endl;
+        }
+        else{
+            break;
+        }
+    }
+
+    Grade newGrade(sjId, newScore, newDate);
+
+    st->updateGrade(*sj, testNum, newGrade);
+
+    cout << "Grade updated" << endl;
 
 }
 bool studentIdInput(vector<Student>& students, Student*& st){
@@ -706,7 +808,7 @@ bool subjectIdInput(vector<Subject>& subjects, Subject*& sj){
     }
 
 }
-int getTestNum(map<int, Grade>& testGrades, bool adding){
+int getTestNum(map<int, Grade>& testGrades, int operation){
 
     int testNum;
 
@@ -738,14 +840,16 @@ int getTestNum(map<int, Grade>& testGrades, bool adding){
         }
         
         auto it = testGrades.find(testNum);
-        if(adding){
+        if(operation == 1){
             if(it != testGrades.end()){
                 cout << "Grade for test " << testNum << " is already assigned" << endl;
-                continue; 
             }
             else{
                 return testNum;
             }
+        }
+        else if(operation == 2){
+            return testNum;
         }
         else{
             return testNum;
@@ -754,5 +858,92 @@ int getTestNum(map<int, Grade>& testGrades, bool adding){
     }
 
     return 0;
+
+}
+void studentReportMenu(vector<Student>& students, vector<Subject>& subjects){
+
+    while(true){
+        cout << "==========================" << endl;
+        cout << "      Student Report      " << endl;
+        cout << "==========================" << endl;
+        cout << "1. Search student by Id" << endl;
+        cout << "0. Exit" << endl;
+        cout << "==========================" << endl;
+        
+        int option;
+        while(true){
+            cout << "Choose an option: ";
+            cin >> option;
+
+            if(cin.fail()){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid option" << endl;
+                continue;
+            }
+
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            if(option < 0 || option > 1){
+                cout << "Invalid option" << endl;
+            }
+            else{
+                break;
+            }
+        }
+
+        switch(option){
+            case 1:
+                showStudentReport(students, subjects);
+                break;
+            case 0:
+                return;
+        }
+
+    }
+
+}
+void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
+
+    if(students.empty()){
+        cout << "There are no students" << endl;
+        return;
+    }
+
+    if(subjects.empty()){
+        cout << "There are no subjects" << endl;
+        return;
+    }
+
+    Student* st = nullptr;
+    if(!studentIdInput(students, st)){
+        return;
+    }
+
+    if(st->getGrades().empty()){
+        cout << "The student have no grades assigned" << endl;
+        return;
+    }
+
+    cout << string(120, '-') << endl;
+    cout << "Student report: " << st->getName() << endl;
+    cout << string(120, '-') << endl;
+
+    cout << left
+         << setw(46) << "Subject"
+         << setw(3) << "T1"  
+         << setw(3) << "T2"  
+         << setw(3) << "T3"  
+         << setw(3) << "T4"
+         << setw(4) << "Avg"
+         << setw(8) << "Status" << endl;
+
+    for(const auto& [subject, gradesMap]: st->getGrades()){
+        string sjName = subject.getName();
+        for(const auto& [testNum, grade]: gradesMap){
+            int test = testNum;
+            double score = grade.getScore();
+        }
+    }
 
 }
