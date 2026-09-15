@@ -31,8 +31,11 @@ void listAllSubjects(vector<Subject>& subjects);
 void gradeMngMenu(vector<Student>& students, vector<Subject>& subjects);
 void addGrade(vector<Student>& students, vector<Subject>& subjects);
 void removeGrade(vector<Student>& students, vector<Subject>& subjects);
+void updateGrade(vector<Student>& students, vector<Subject>& subjects);
 bool studentIdInput(vector<Student>& students, Student*& st);
 bool subjectIdInput(vector<Subject>& subjects, Subject*& sj);
-int getTestNum(map<int, Grade>& testGrades, bool adding);
+int getTestNum(map<int, Grade>& testGrades, int operation);
+void studentReportMenu(vector<Student>& students, vector<Subject>& subjects);
+void showStudentReport(vector<Student>& students, vector<Subject>& subjects);
 
 #endif

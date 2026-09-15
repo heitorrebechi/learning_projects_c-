@@ -24,7 +24,14 @@ void Student::removeGrade(Subject sj, int testNum){
 }
 void Student::updateGrade(Subject sj, int testNum, Grade newGrade){
 
-    grades[sj][testNum] = newGrade;
+    auto it = grades[sj].find(testNum);
+
+    if(it != grades[sj].end()){
+        it->second = newGrade;
+    }
+    else{
+        grades[sj].insert({testNum, newGrade});
+    }
 
 }
 double Student::getAverage() const{
@@ -35,9 +42,6 @@ double Student::getHighest() const{
 }
 double Student::getLowest() const{
     return 0;
-}
-Status Student::getStatus() const{
-    return Status::PASSING;
 }
 Student::Student(int id, string name, string birthDate){
     this->id = id;

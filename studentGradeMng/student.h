@@ -9,7 +9,21 @@
 #include <unordered_map>
 #include <map>
 
-enum class Status { PASSING, FAILING };
+enum class Status { Passing, Failing };
+
+ostream& operator<<(ostream& os, Status status){
+    switch(status){
+        case Status::Passing:
+            os << "Passing";
+            break;
+        case Status::Failing:
+            os << "Failing";
+            break;
+    }
+
+    return os;
+    
+}
 
 class Student{
     private:
@@ -28,7 +42,6 @@ class Student{
         double getAverage() const;
         double getHighest() const;
         double getLowest() const;
-        Status getStatus() const;
     Student(int id, string name, string birthDate);
 };
 

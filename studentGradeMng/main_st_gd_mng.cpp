@@ -925,25 +925,51 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
         return;
     }
 
-    cout << string(120, '-') << endl;
+    cout << string(120, '=') << endl;
     cout << "Student report: " << st->getName() << endl;
     cout << string(120, '-') << endl;
 
     cout << left
-         << setw(46) << "Subject"
-         << setw(3) << "T1"  
-         << setw(3) << "T2"  
-         << setw(3) << "T3"  
-         << setw(3) << "T4"
-         << setw(4) << "Avg"
+         << setw(46) << "Subject" << " | "
+         << setw(5) << "T1" << " | "
+         << setw(5) << "T2" << " | "  
+         << setw(5) << "T3" << " | "  
+         << setw(5) << "T4" << " | "
+         << setw(5) << "Avg" << " | "
          << setw(8) << "Status" << endl;
+    cout << string(120, '-') << endl;
 
     for(const auto& [subject, gradesMap]: st->getGrades()){
+        
         string sjName = subject.getName();
-        for(const auto& [testNum, grade]: gradesMap){
-            int test = testNum;
-            double score = grade.getScore();
+        vector<double> scores;
+        int nTests = 0;
+        
+        for(int i=1; i < 5; i++){
+            auto itScore = gradesMap.find(i);
+
+            if(itScore == gradesMap.end()){
+                scores.push_back(0);
+            }
+            else{
+                scores.push_back(itScore->second.getScore());
+                nTests++;
+            }
+
         }
+
+        double avg = (scores[0] + scores[1] + scores[2] + scores[3]) / nTests;
+        Status status = (avg >= 7.0? Status::Passing : Status::Failing);
+
+        cout << left
+             << setw(46) << sjName << " | "
+             << setw(5) << fixed << setprecision(1) << scores[0] << " | "
+             << setw(5) << fixed << setprecision(1) << scores[1] << " | "
+             << setw(5) << fixed << setprecision(1) << scores[2] << " | "
+             << setw(5) << fixed << setprecision(1) << scores[3] << " | "
+             << setw(5) << fixed << setprecision(1) << avg << " | "
+             << setw(8) << status << endl;
+
     }
 
 }
