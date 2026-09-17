@@ -24,6 +24,7 @@ int main(){
                 studentReportMenu(students, subjects);
                 break;
             case 5:
+
                 break;
             case 0:
                 cout << "Exiting...";
@@ -464,14 +465,18 @@ void gradeMngMenu(vector<Student>& students, vector<Subject>& subjects){
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cout << "Invalid Option" << endl;
+                continue;
             }
-            else if(option < 0 || option > 3){
+            
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');            
+            
+            if(option < 0 || option > 3){
                 cout << "Invalid Option" << endl;
             }
             else{
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 break;
             }
+
         }
 
         switch(option){
@@ -939,27 +944,13 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
          << setw(8) << "Status" << endl;
     cout << string(120, '-') << endl;
 
-    for(const auto& [subject, gradesMap]: st->getGrades()){
+    for(const auto& [sj, gradesMap]: st->getGrades()){
         
-        string sjName = subject.getName();
+        string sjName = sj.getName();
         vector<double> scores;
-        int nTests = 0;
+        double avg = st->getAverage(sj, &scores);
         
-        for(int i=1; i < 5; i++){
-            auto itScore = gradesMap.find(i);
-
-            if(itScore == gradesMap.end()){
-                scores.push_back(0);
-            }
-            else{
-                scores.push_back(itScore->second.getScore());
-                nTests++;
-            }
-
-        }
-
-        double avg = (scores[0] + scores[1] + scores[2] + scores[3]) / nTests;
-        Status status = (avg >= 7.0? Status::Passing : Status::Failing);
+        Status status = (avg >= 6.0? Status::Passing : Status::Failing);
 
         cout << left
              << setw(46) << sjName << " | "
@@ -971,5 +962,50 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
              << setw(8) << status << endl;
 
     }
+
+}
+void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
+    
+    while(true){
+        cout << "==========================" << endl;
+        cout << "       Class Report       " << endl;
+        cout << "==========================" << endl;
+        cout << "1. Show class report" << endl;
+        cout << "0. Exit" << endl;
+        cout << "==========================" << endl;
+
+        int option;
+        while(true){
+            cout << "Choose an option: ";
+            cin >> option;
+
+            if(cin.fail()){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid option" << endl;
+                continue;
+            }
+
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            if(option < 0 || option > 1){
+                cout << "Invalid option" << endl;
+            }
+            else{
+                break;
+            }
+        }
+
+        switch(option){
+            case 1:
+                break;
+            case 0:
+                return;
+        }
+
+    }
+
+}
+void showClassReport(vector<Student>& students, vector<Subject>& subjects){
 
 }

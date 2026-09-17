@@ -9,7 +9,7 @@ string Student::getName() const{
 string Student::getBirthDate() const{
     return birthDate;
 }
-unordered_map<Subject, map<int, Grade>> Student::getGrades() const{
+const unordered_map<Subject, map<int, Grade>>& Student::getGrades() const{
     return grades;
 }
 void Student::addGrade(Subject sj, int testNum, Grade g){
@@ -34,8 +34,28 @@ void Student::updateGrade(Subject sj, int testNum, Grade newGrade){
     }
 
 }
-double Student::getAverage() const{
-    return 0;
+double Student::getAverage(const Subject& sj, vector<double>* scores) const{
+
+    auto sjIt = grades.find(sj);
+    if(sjIt == grades.end()) return 0.0;
+    const map<int, Grade>& gradesMap = sjIt->second;
+
+    double total = 0.0;
+
+    for(int i=1; i <= 4; i++){
+        auto itScore = gradesMap.find(i);
+        double score = (itScore == gradesMap.end()? 0.0 : itScore->second.getScore());
+
+        total += score;
+
+        if(scores != nullptr){
+            scores->push_back(score);
+        }
+    }
+
+    if(gradesMap.empty()) return 0.0;
+    return total / gradesMap.size();
+
 }
 double Student::getHighest() const{
     return 0;

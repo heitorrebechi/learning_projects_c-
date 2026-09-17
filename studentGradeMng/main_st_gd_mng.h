@@ -37,5 +37,7 @@ bool subjectIdInput(vector<Subject>& subjects, Subject*& sj);
 int getTestNum(map<int, Grade>& testGrades, int operation);
 void studentReportMenu(vector<Student>& students, vector<Subject>& subjects);
 void showStudentReport(vector<Student>& students, vector<Subject>& subjects);
+void classReportMenu(vector<Student>& students, vector<Subject>& subjects);
+void showClassReport(vector<Student>& students, vector<Subject>& subjects);
 
 #endif

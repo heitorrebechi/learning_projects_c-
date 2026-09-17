@@ -35,11 +35,11 @@ class Student{
         int getId() const;
         string getName() const;
         string getBirthDate() const;
-        unordered_map<Subject, map<int, Grade>> getGrades() const;
+        const unordered_map<Subject, map<int, Grade>>& getGrades() const;
         void addGrade(Subject sj, int testNum, Grade g);
         void removeGrade(Subject sj, int testNum);
         void updateGrade(Subject sj, int testNum, Grade newGrade);
-        double getAverage() const;
+        double getAverage(const Subject& sj, vector<double>* scores = nullptr) const;
         double getHighest() const;
         double getLowest() const;
     Student(int id, string name, string birthDate);
