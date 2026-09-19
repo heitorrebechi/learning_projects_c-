@@ -32,7 +32,7 @@ int main(){
                 studentReportMenu(students, subjects);
                 break;
             case 5:
-                showClassReport(students, subjects);
+                classReportMenu(students, subjects);
                 break;
             case 0:
                 cout << "Exiting...";
@@ -46,7 +46,7 @@ int main(){
 int mainMenu(){
 
     cout << "==========================" << endl;
-    cout << "   Stuent Grade Manager   " << endl;
+    cout << "   Student Grade Manager  " << endl;
     cout << "==========================" << endl;
     cout << "1. Student Management" << endl;
     cout << "2. Subject Management" << endl;
@@ -268,21 +268,19 @@ void listAllStudents(vector<Student>& students){
         return;
     }
 
-    // STUDENTS
-    cout << string(64, '-') << endl;
-
+    cout << string(68, '-') << endl;
     cout << left
-         << setw(6) << "ID"
-         << setw(46) << "Name"
+         << setw(6) << "ID" << " | "
+         << setw(46) << "Name" << " | "
          << setw(12) << "Birth-Date" << endl;
-
-    cout << string(64, '-') << endl;
+    cout << string(68, '-') << endl;
 
     for(const Student& s: students){
-        cout << left
+        cout << right
              << setfill('0') << setw(6);
-        cout << s.getId() << setfill(' ')
-             << setw(46) << s.getName()
+        cout << s.getId() << setfill(' ') << " | ";
+        cout << left
+             << setw(46) << s.getName() << " | "
              << setw(12) << s.getBirthDate() << endl;
     }
 
@@ -424,20 +422,21 @@ void listAllSubjects(vector<Subject>& subjects){
         return;
     }
 
-    cout << string(98, '-') << endl;
+    cout << string(104, '-') << endl;
 
     cout << left
-         << setw(6) << "ID"
-         << setw(46) << "Subject"
+         << setw(6) << "ID" << " | "
+         << setw(46) << "Subject" << " | "
          << setw(46) << "Teacher" << endl;
 
-    cout << string(98, '-') << endl;
+    cout << string(104, '-') << endl;
 
     for(const Subject& sj: subjects){
-        cout << left
+        cout << right
              << setfill('0') << setw(6);
-        cout << sj.getId() << setfill(' ')
-             << setw(46) << sj.getName()
+        cout << sj.getId() << setfill(' ') << " | ";
+        cout << left
+             << setw(46) << sj.getName() << " | "
              << setw(46) << sj.getTeacher() << endl;
     }
 
@@ -974,8 +973,9 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
         cout << "==========================" << endl;
         cout << "       Class Report       " << endl;
         cout << "==========================" << endl;
-        cout << "1. Students report" << endl;
-        cout << "2. Subjects report" << endl;
+        cout << "1. Students report by subject" << endl;
+        cout << "2. Students overall report" << endl;
+        cout << "3. Subjects overall report" << endl;
         cout << "0. Exit" << endl;
         cout << "==========================" << endl;
 
@@ -993,7 +993,7 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
 
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-            if(option < 0 || option > 2){
+            if(option < 0 || option > 3){
                 cout << "Invalid option" << endl;
             }
             else if(option == 0){
@@ -1016,62 +1016,101 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
 
         switch(option){
             case 1:
-                showClassReport(students, subjects);
+                showClassReportBySubject(students, subjects);
+                break;
+            case 2:
+                break;
+            case 3:
                 break;
         }
 
     }
 
 }
-void showClassReport(vector<Student>& students, vector<Subject>& subjects){
+void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjects){
 
-    double totalAverages = 0.0;
+    int nStZeroGrades = 0;
+
+    for(const Student& st: students){
+        if(st.getGrades().empty()){
+            nStZeroGrades++;
+        }
+    }
+    if(nStZeroGrades != 0){
+        cout << "No student have grades assigned" << endl;
+        return;
+    }
+
     vector<Student> sortedStudents = students;
+    vector<Subject> assignedSjs;
 
-    cout << string(98, '-') << endl;
+    for(const Student& st: students){
+        for(const auto& [sj, gradesMap]: st.getGrades()){
+            auto it = find_if(assignedSjs.begin(), assignedSjs.end(), [sj](const Subject& aSj){
+                return sj == aSj;
+            });
+            if(it == assignedSjs.end()){
+                assignedSjs.push_back(sj);
+            }
+        }
+    }
+
+    sort(assignedSjs.begin(), assignedSjs.end(), [](const Subject& a, const Subject& b){
+        return a.getId() < b.getId();
+    });
+
+    cout << string(100, '=') << endl;
     cout << "Class Students Report" << endl;
-    cout << string(98, '-') << endl;
+    cout << string(100, '=') << endl;
 
     cout << left
          << setw(6) << "SbjID" << " | "
          << setw(46) << "Subject name" << " | "
          << setw(46) << "Teacher name" << endl;
 
-    for(const Subject& sj: subjects){
+    for(const Subject& sj: assignedSjs){
 
-        cout << string(98, '-') << endl;
+        cout << string(100, '=') << endl;
 
-        cout << left
+        cout << right
              << setfill('0') << setw(6);
-        cout << sj.getId() << setfill(' ') << " | "
+        cout << sj.getId() << setfill(' ') << " | ";
+        cout << left
              << setw(46) << sj.getName() << " | "
              << setw(46) << sj.getTeacher() << endl;
 
-        cout << string(98, '-') << endl;
+        cout << string(100, '=') << endl;
 
         cout << left
              << setw(6) << " " << " | "
              << setw(6) << "StdID" << " | "
              << setw(61) << "Student" << " | "
-             << setw(8) << "GenAvg" << " | "
+             << setw(8) << "SjAvg" << " | "
              << setw(8) << "Status" << endl;
-        cout << string(98, '-') << endl;
+        cout << string(100, '-') << endl;
 
-        sort(sortedStudents.begin(), sortedStudents.end(), [](const Student& a, const Student& b){
-            return a.getGeneralAverage() > b.getGeneralAverage();
+        sort(sortedStudents.begin(), sortedStudents.end(), [sj](const Student& a, const Student& b){
+            return a.getAverage(sj) > b.getAverage(sj);
         });
 
-        // output show every stundent, not caring about if they have the subject or not
+        vector<Student> assignedSts;
 
-        totalAverages = 0.0;
-        int nPassing;
         for(const Student& st: sortedStudents){
+            auto it = st.getGrades().find(sj);
+            if(it != st.getGrades().end()){
+                assignedSts.push_back(st);
+            }
+        }
+
+        double totalSjAverages = 0.0;
+        int nPassing;
+        for(const Student& st: assignedSts){
             
-            double stGenAvg = st.getGeneralAverage();
-            totalAverages += stGenAvg;
+            double stSubjectAvg = st.getAverage(sj);
+            totalSjAverages += stSubjectAvg;
 
             Status stStatus;
-            if(stGenAvg >= 6.0){
+            if(stSubjectAvg >= 6.0){
                 nPassing++;
                 stStatus = Status::Passing;
             }
@@ -1080,25 +1119,27 @@ void showClassReport(vector<Student>& students, vector<Subject>& subjects){
             }
 
             cout << left
-                 << setw(6) << " " << " | "
+                 << setw(6) << " " << " | ";
+            cout << right
                  << setfill('0') << setw(6);
-            cout << st.getId() << setfill(' ') << " | "
+            cout << st.getId() << setfill(' ') << " | ";
+            cout << left
                  << setw(61) << st.getName() << " | "
-                 << setw(8) << fixed <<  setprecision(1) << stGenAvg << " | "
+                 << setw(8) << fixed <<  setprecision(1) << stSubjectAvg << " | "
                  << setw(8) << stStatus << endl;
 
         }
 
+        double classSjAvg = totalSjAverages / assignedSts.size();
+        Status classSjStatus = classSjAvg >= 6.0? Status::Passing: Status::Failing;
+        cout << string(100, '-') << endl;
+        cout << left
+             << setw(6) << " " << " | "
+             << setw(18) << "Class Average for " 
+             << setw(52) << sj.getName() << " | "
+             << setw(8) << fixed << setprecision(1) << classSjAvg << " | "
+             << setw(8) << classSjStatus << endl;
+
     }
-
-    double classAvg = totalAverages / sortedStudents.size();
-    Status classStatus = classAvg >= 6.0? Status::Passing: Status::Failing;
-
-    cout << string(98, '-') << endl;
-    cout << left
-         << setw(76) << "Class Average" << " | "
-         << setw(8) << fixed << setprecision(1) << classAvg << " | "
-         << setw(8) << classStatus << endl;
-    cout << string(98, '-') << endl;
 
 }
