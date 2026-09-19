@@ -1036,7 +1036,7 @@ void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjec
             nStZeroGrades++;
         }
     }
-    if(nStZeroGrades != 0){
+    if(nStZeroGrades == students.size()){
         cout << "No student have grades assigned" << endl;
         return;
     }
@@ -1103,7 +1103,7 @@ void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjec
         }
 
         double totalSjAverages = 0.0;
-        int nPassing;
+        int nPassing = 0;  // add nPassing a place to be, and show students passing for sj x/nSt, also for total
         for(const Student& st: assignedSts){
             
             double stSubjectAvg = st.getAverage(sj);

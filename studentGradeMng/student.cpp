@@ -64,6 +64,8 @@ double Student::getGeneralAverage() const{
         allAverages.push_back(getAverage(sj));
     }
 
+    if(allAverages.empty()) return -1.0;
+
     double totalAvg = 0.0;
 
     for(const double& avg: allAverages){
