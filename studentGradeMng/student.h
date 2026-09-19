@@ -39,7 +39,8 @@ class Student{
         void addGrade(Subject sj, int testNum, Grade g);
         void removeGrade(Subject sj, int testNum);
         void updateGrade(Subject sj, int testNum, Grade newGrade);
-        double getAverage(const Subject& sj, vector<double>* scores = nullptr) const;
+        double getAverage(const Subject& sj) const;
+        double getGeneralAverage() const;
         double getHighest() const;
         double getLowest() const;
     Student(int id, string name, string birthDate);

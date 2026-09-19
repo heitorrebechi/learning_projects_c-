@@ -34,27 +34,43 @@ void Student::updateGrade(Subject sj, int testNum, Grade newGrade){
     }
 
 }
-double Student::getAverage(const Subject& sj, vector<double>* scores) const{
+double Student::getAverage(const Subject& sj) const{
 
     auto sjIt = grades.find(sj);
-    if(sjIt == grades.end()) return 0.0;
+    if(sjIt == grades.end()) return -1.0;
     const map<int, Grade>& gradesMap = sjIt->second;
 
     double total = 0.0;
+    double nScores = 0.0;
 
     for(int i=1; i <= 4; i++){
         auto itScore = gradesMap.find(i);
-        double score = (itScore == gradesMap.end()? 0.0 : itScore->second.getScore());
-
-        total += score;
-
-        if(scores != nullptr){
-            scores->push_back(score);
+        if(itScore != gradesMap.end()){
+            total += itScore->second.getScore();
+            nScores += 1.0;
         }
+
     }
 
-    if(gradesMap.empty()) return 0.0;
-    return total / gradesMap.size();
+    if(nScores == 0) return -1.0;
+    return total / nScores;
+
+}
+double Student::getGeneralAverage() const{
+
+    vector<double> allAverages;
+
+    for(const auto& [sj, gradesMap]: grades){
+        allAverages.push_back(getAverage(sj));
+    }
+
+    double totalAvg = 0.0;
+
+    for(const double& avg: allAverages){
+        totalAvg += avg;
+    }
+
+    return totalAvg / allAverages.size();
 
 }
 double Student::getHighest() const{

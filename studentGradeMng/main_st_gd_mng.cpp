@@ -3,9 +3,17 @@
 int main(){
 
     vector<Student> students = {};
+    if(!students.empty()){
+        sort(students.begin(), students.end(), [](const Student& a, const Student& b){
+            return a.getId() < b.getId();
+        });
+    }
     vector<Subject> subjects = {};
-
-    srand(time(0));
+    if(!subjects.empty()){
+        sort(subjects.begin(), subjects.end(), [](const Subject& a, const Subject& b){
+            return a.getId() < b.getId();
+        });
+    }
 
     while(true){
         int option = mainMenu();
@@ -24,7 +32,7 @@ int main(){
                 studentReportMenu(students, subjects);
                 break;
             case 5:
-
+                showClassReport(students, subjects);
                 break;
             case 0:
                 cout << "Exiting...";
@@ -162,17 +170,11 @@ void addStudent(vector<Student>& students){
 }
 int generateStudentId(vector<Student>& students){
 
-    while(true){
-        int id = rand() % 5000 + 1;
-
-        auto it = find_if(students.begin(), students.end(), [id](const Student& st){
-            return st.getId() == id;
-        });
-
-        if(it == students.end()){
-            return id;
-        }
+    if(students.empty()){
+        return 1;
     }
+
+    return students.back().getId() + 1;
 
 }
 bool isValidDate(string& date){
@@ -278,7 +280,8 @@ void listAllStudents(vector<Student>& students){
 
     for(const Student& s: students){
         cout << left
-             << setw(6) << s.getId()
+             << setfill('0') << setw(6);
+        cout << s.getId() << setfill(' ')
              << setw(46) << s.getName()
              << setw(12) << s.getBirthDate() << endl;
     }
@@ -368,17 +371,11 @@ void addSubject(vector<Subject>& subjects){
 }
 int generateSubjectId(vector<Subject>& subjects){
 
-    while(true){
-        int id = rand() % 5000 + 1;
-
-        auto it = find_if(subjects.begin(), subjects.end(), [id](const Subject& sj){
-            return sj.getId() == id;
-        });
-
-        if(it == subjects.end()){
-            return id;
-        }
+    if(subjects.empty()){
+        return 1;
     }
+
+    return subjects.back().getId() + 1;
 
 }
 void removeSubject(vector<Subject>& subjects){
@@ -438,7 +435,8 @@ void listAllSubjects(vector<Subject>& subjects){
 
     for(const Subject& sj: subjects){
         cout << left
-             << setw(6) << sj.getId()
+             << setfill('0') << setw(6);
+        cout << sj.getId() << setfill(' ')
              << setw(46) << sj.getName()
              << setw(46) << sj.getTeacher() << endl;
     }
@@ -693,7 +691,7 @@ void updateGrade(vector<Student>& students, vector<Subject>& subjects){
         }
     }
 
-    int newScore;
+    double newScore;
     while(true){
         cout << "Enter the test new score: ";
         cin >> newScore;
@@ -871,10 +869,10 @@ void studentReportMenu(vector<Student>& students, vector<Subject>& subjects){
         cout << "==========================" << endl;
         cout << "      Student Report      " << endl;
         cout << "==========================" << endl;
-        cout << "1. Search student by Id" << endl;
+        cout << "1. Search student ID" << endl;
         cout << "0. Exit" << endl;
         cout << "==========================" << endl;
-        
+
         int option;
         while(true){
             cout << "Choose an option: ";
@@ -911,12 +909,12 @@ void studentReportMenu(vector<Student>& students, vector<Subject>& subjects){
 void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
 
     if(students.empty()){
-        cout << "There are no students" << endl;
+        cout << "There are no students registered" << endl;
         return;
     }
 
     if(subjects.empty()){
-        cout << "There are no subjects" << endl;
+        cout << "There are no subjects registered" << endl;
         return;
     }
 
@@ -931,7 +929,9 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
     }
 
     cout << string(120, '=') << endl;
-    cout << "Student report: " << st->getName() << endl;
+    cout << left
+         << "Student Report: " << setw(91) << st->getName() << " | "
+         << setw(11) << st->getBirthDate() << endl;
     cout << string(120, '-') << endl;
 
     cout << left
@@ -945,21 +945,25 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
     cout << string(120, '-') << endl;
 
     for(const auto& [sj, gradesMap]: st->getGrades()){
-        
-        string sjName = sj.getName();
-        vector<double> scores;
-        double avg = st->getAverage(sj, &scores);
-        
-        Status status = (avg >= 6.0? Status::Passing : Status::Failing);
 
         cout << left
-             << setw(46) << sjName << " | "
-             << setw(5) << fixed << setprecision(1) << scores[0] << " | "
-             << setw(5) << fixed << setprecision(1) << scores[1] << " | "
-             << setw(5) << fixed << setprecision(1) << scores[2] << " | "
-             << setw(5) << fixed << setprecision(1) << scores[3] << " | "
-             << setw(5) << fixed << setprecision(1) << avg << " | "
-             << setw(8) << status << endl;
+             << setw(46) << sj.getName() << " | ";
+
+        for(int i=1; i <= 4; i++){
+            auto it = gradesMap.find(i);
+            if(it != gradesMap.end()){
+                cout << setw(5) << fixed << setprecision(1) << it->second.getScore() << " | ";
+            }
+            else{
+                cout << setw(5) << "--" << " | ";
+            }
+
+        }
+
+        double avg = st->getAverage(sj);
+        cout << setw(5) << fixed << setprecision(1) << avg << " | ";
+        Status status = avg >= 6.0? Status::Passing: Status::Failing;
+        cout << setw(8) << status << endl;
 
     }
 
@@ -970,7 +974,8 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
         cout << "==========================" << endl;
         cout << "       Class Report       " << endl;
         cout << "==========================" << endl;
-        cout << "1. Show class report" << endl;
+        cout << "1. Students report" << endl;
+        cout << "2. Subjects report" << endl;
         cout << "0. Exit" << endl;
         cout << "==========================" << endl;
 
@@ -988,24 +993,112 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
 
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-            if(option < 0 || option > 1){
+            if(option < 0 || option > 2){
                 cout << "Invalid option" << endl;
+            }
+            else if(option == 0){
+                return;
             }
             else{
                 break;
             }
         }
 
+        if(students.empty()){
+            cout << "There are no studends registered" << endl;
+            return;
+        }
+
+        if(subjects.empty()){
+            cout << "There are no subjects registered" << endl;
+            return;
+        }
+
         switch(option){
             case 1:
+                showClassReport(students, subjects);
                 break;
-            case 0:
-                return;
         }
 
     }
 
 }
 void showClassReport(vector<Student>& students, vector<Subject>& subjects){
+
+    double totalAverages = 0.0;
+    vector<Student> sortedStudents = students;
+
+    cout << string(98, '-') << endl;
+    cout << "Class Students Report" << endl;
+    cout << string(98, '-') << endl;
+
+    cout << left
+         << setw(6) << "SbjID" << " | "
+         << setw(46) << "Subject name" << " | "
+         << setw(46) << "Teacher name" << endl;
+
+    for(const Subject& sj: subjects){
+
+        cout << string(98, '-') << endl;
+
+        cout << left
+             << setfill('0') << setw(6);
+        cout << sj.getId() << setfill(' ') << " | "
+             << setw(46) << sj.getName() << " | "
+             << setw(46) << sj.getTeacher() << endl;
+
+        cout << string(98, '-') << endl;
+
+        cout << left
+             << setw(6) << " " << " | "
+             << setw(6) << "StdID" << " | "
+             << setw(61) << "Student" << " | "
+             << setw(8) << "GenAvg" << " | "
+             << setw(8) << "Status" << endl;
+        cout << string(98, '-') << endl;
+
+        sort(sortedStudents.begin(), sortedStudents.end(), [](const Student& a, const Student& b){
+            return a.getGeneralAverage() > b.getGeneralAverage();
+        });
+
+        // output show every stundent, not caring about if they have the subject or not
+
+        totalAverages = 0.0;
+        int nPassing;
+        for(const Student& st: sortedStudents){
+            
+            double stGenAvg = st.getGeneralAverage();
+            totalAverages += stGenAvg;
+
+            Status stStatus;
+            if(stGenAvg >= 6.0){
+                nPassing++;
+                stStatus = Status::Passing;
+            }
+            else{
+                stStatus = Status::Failing;
+            }
+
+            cout << left
+                 << setw(6) << " " << " | "
+                 << setfill('0') << setw(6);
+            cout << st.getId() << setfill(' ') << " | "
+                 << setw(61) << st.getName() << " | "
+                 << setw(8) << fixed <<  setprecision(1) << stGenAvg << " | "
+                 << setw(8) << stStatus << endl;
+
+        }
+
+    }
+
+    double classAvg = totalAverages / sortedStudents.size();
+    Status classStatus = classAvg >= 6.0? Status::Passing: Status::Failing;
+
+    cout << string(98, '-') << endl;
+    cout << left
+         << setw(76) << "Class Average" << " | "
+         << setw(8) << fixed << setprecision(1) << classAvg << " | "
+         << setw(8) << classStatus << endl;
+    cout << string(98, '-') << endl;
 
 }
