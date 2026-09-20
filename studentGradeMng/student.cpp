@@ -21,6 +21,10 @@ void Student::removeGrade(Subject sj, int testNum){
 
     grades[sj].erase(testNum);
 
+    if(grades[sj].empty()){
+        grades.erase(sj);
+    }
+
 }
 void Student::updateGrade(Subject sj, int testNum, Grade newGrade){
 
@@ -76,10 +80,30 @@ double Student::getGeneralAverage() const{
 
 }
 double Student::getHighest() const{
-    return 0;
+
+    vector<double> scores;
+
+    for(const auto& [sj, gradesMap]: grades){
+        for(const auto& [test, grade]: gradesMap){
+            scores.push_back(grade.getScore());
+        }
+    }
+
+    return *max_element(scores.begin(), scores.end());
+    
 }
 double Student::getLowest() const{
-    return 0;
+    
+    vector<double> scores;
+
+    for(const auto& [sj, gradesMap]: grades){
+        for(const auto& [test, grade]: gradesMap){
+            scores.push_back(grade.getScore());
+        }
+    }
+
+    return *min_element(scores.begin(), scores.end());
+
 }
 Student::Student(int id, string name, string birthDate){
     this->id = id;

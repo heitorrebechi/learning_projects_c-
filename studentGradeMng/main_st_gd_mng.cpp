@@ -836,6 +836,7 @@ int getTestNum(map<int, Grade>& testGrades, int operation){
 
         if(testNum < 0 || testNum > 4){
             cout << "Invalid Option" << endl;
+            continue;
         }
         else if(testNum == 0){
             return 0;
@@ -927,11 +928,11 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
         return;
     }
 
-    cout << string(120, '=') << endl;
+    cout << string(108, '=') << endl;
     cout << left
-         << "Student Report: " << setw(91) << st->getName() << " | "
+         << "Student Report: " << setw(79) << st->getName() << " | "
          << setw(11) << st->getBirthDate() << endl;
-    cout << string(120, '-') << endl;
+    cout << string(108, '-') << endl;
 
     cout << left
          << setw(46) << "Subject" << " | "
@@ -941,7 +942,7 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
          << setw(5) << "T4" << " | "
          << setw(5) << "Avg" << " | "
          << setw(8) << "Status" << endl;
-    cout << string(120, '-') << endl;
+    cout << string(108, '-') << endl;
 
     for(const auto& [sj, gradesMap]: st->getGrades()){
 
@@ -966,6 +967,11 @@ void showStudentReport(vector<Student>& students, vector<Subject>& subjects){
 
     }
 
+    cout << string(108, '-') << endl;
+    cout << "Highest Score: " << fixed << setprecision(1) << st->getHighest() << endl;
+    cout << "Lowest Score: " << fixed << setprecision(1) << st->getLowest() << endl;
+    cout << string(108, '-') << endl;
+
 }
 void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
     
@@ -975,7 +981,6 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
         cout << "==========================" << endl;
         cout << "1. Students report by subject" << endl;
         cout << "2. Students overall report" << endl;
-        cout << "3. Subjects overall report" << endl;
         cout << "0. Exit" << endl;
         cout << "==========================" << endl;
 
@@ -993,7 +998,7 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
 
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-            if(option < 0 || option > 3){
+            if(option < 0 || option > 2){
                 cout << "Invalid option" << endl;
             }
             else if(option == 0){
@@ -1019,8 +1024,7 @@ void classReportMenu(vector<Student>& students, vector<Subject>& subjects){
                 showClassReportBySubject(students, subjects);
                 break;
             case 2:
-                break;
-            case 3:
+                showStudentsOverallReport(students);
                 break;
         }
 
@@ -1103,7 +1107,6 @@ void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjec
         }
 
         double totalSjAverages = 0.0;
-        int nPassing = 0;  // add nPassing a place to be, and show students passing for sj x/nSt, also for total
         for(const Student& st: assignedSts){
             
             double stSubjectAvg = st.getAverage(sj);
@@ -1111,7 +1114,6 @@ void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjec
 
             Status stStatus;
             if(stSubjectAvg >= 6.0){
-                nPassing++;
                 stStatus = Status::Passing;
             }
             else{
@@ -1143,3 +1145,57 @@ void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjec
     }
 
 }
+void showStudentsOverallReport(vector<Student>& students){
+
+    int nStWithoutGrades = 0;
+    for(const Student& st: students){
+        if(st.getGrades().empty()){
+            nStWithoutGrades++;
+        }
+    }
+    if(nStWithoutGrades == students.size()){
+        cout << "No students have grades assigned" << endl;
+        return;
+    }
+
+    cout << string(76, '-') << endl;
+    cout << "Students overall:" << endl;
+    cout << string(76, '-') << endl;
+    cout << left
+         << setw(6) << "St ID" << " | "
+         << setw(46) << "Student Name" << " | "
+         << setw(8) << "TotalAvg" << " | "
+         << setw(8) << "Status" << endl;
+    cout << string(76, '-') << endl;
+
+    double overallAvg = 0;
+    int nStWithGrades = 0;
+
+    for(const Student& st: students){
+
+        double ovStAvg = st.getGeneralAverage();
+        if(ovStAvg < 0) continue;
+        Status status = ovStAvg >= 6.0? Status::Passing: Status::Failing;
+
+        overallAvg += ovStAvg;
+        nStWithGrades++;
+
+        cout << right
+             << setfill('0') << setw(6);
+        cout << st.getId() << setfill(' ') << " | ";
+        cout << left
+             << setw(46) << st.getName() << " | "
+             << setw(8) << fixed << setprecision(1) << ovStAvg << " | "
+             << setw(8) << status << endl;
+    }
+
+    Status genStatus = overallAvg >= 6.0? Status::Passing: Status::Failing;
+    cout << string(76, '-') << endl;
+    cout << left
+         << setw(55) << "Overall view: " << " | "
+         << setw(8) << fixed << setprecision(1) << overallAvg / nStWithGrades << " | "
+         << setw(8) << genStatus << endl;
+    cout << string(76, '-') << endl;
+
+}
+

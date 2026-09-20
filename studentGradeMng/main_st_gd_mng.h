@@ -39,5 +39,6 @@ void studentReportMenu(vector<Student>& students, vector<Subject>& subjects);
 void showStudentReport(vector<Student>& students, vector<Subject>& subjects);
 void classReportMenu(vector<Student>& students, vector<Subject>& subjects);
 void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjects);
+void showStudentsOverallReport(vector<Student>& students);
 
 #endif
