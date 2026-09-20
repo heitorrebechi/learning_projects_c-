@@ -4,9 +4,6 @@
 #include "subject.h"
 #include "student.h"
 #include "grade.h"
-#include "subject.cpp"
-#include "student.cpp"
-#include "grade.cpp"
 #include <ctime>
 #include <string>
 #include <regex>

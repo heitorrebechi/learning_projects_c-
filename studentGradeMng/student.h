@@ -11,19 +11,7 @@
 
 enum class Status { Passing, Failing };
 
-ostream& operator<<(ostream& os, Status status){
-    switch(status){
-        case Status::Passing:
-            os << "Passing";
-            break;
-        case Status::Failing:
-            os << "Failing";
-            break;
-    }
-
-    return os;
-    
-}
+ostream& operator<<(ostream& os, Status status);
 
 class Student{
     private:
