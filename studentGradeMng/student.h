@@ -31,7 +31,7 @@ class Student{
         double getGeneralAverage() const;
         double getHighest() const;
         double getLowest() const;
-    Student(int id, string name, string birthDate);
+    Student(int id, string name, string birthDate="____-__-__");
 };
 
 #endif

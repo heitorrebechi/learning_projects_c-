@@ -3,17 +3,21 @@
 int main(){
 
     vector<Student> students = {};
+    loadStudents(students);
     if(!students.empty()){
         sort(students.begin(), students.end(), [](const Student& a, const Student& b){
             return a.getId() < b.getId();
         });
     }
+
     vector<Subject> subjects = {};
+    loadSubjects(subjects);
     if(!subjects.empty()){
         sort(subjects.begin(), subjects.end(), [](const Subject& a, const Subject& b){
             return a.getId() < b.getId();
         });
     }
+    loadGrades(students, subjects);
 
     while(true){
         int option = mainMenu();
@@ -167,6 +171,8 @@ void addStudent(vector<Student>& students){
 
     students.push_back(s);
 
+    saveStudents(students);
+
 }
 int generateStudentId(vector<Student>& students){
 
@@ -175,52 +181,6 @@ int generateStudentId(vector<Student>& students){
     }
 
     return students.back().getId() + 1;
-
-}
-bool isValidDate(string& date){
-
-    const regex date_pattern(R"(^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\d|3[01])$)");
-    
-    if(!regex_match(date, date_pattern)){
-        return 0;
-    }
-    
-    //0123456789
-    //2008-02-02
-    int year = stoi(date.substr(0, 4));
-    int month = stoi(date.substr(5, 2));
-    int day = stoi(date.substr(8, 2));
-
-    time_t now = time(0);
-    tm* today = localtime(&now);
-
-    int currentYear = today->tm_year + 1900;
-    int currentMonth = today->tm_mon + 1;
-    int currentDay = today->tm_mday;
-
-    if(year > currentYear){
-        return 0;
-    }
-    else if(year == currentYear && month > currentMonth){
-        return 0;
-    }
-    else if(year == currentYear && month == currentMonth && day > currentDay){
-        return 0;
-    }
-    else if((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)){
-        if(month == 2 && day > 29){
-            return 0;
-        }
-        else{
-            return 1;
-        }
-    }
-    else if(month == 2 && day > 28){
-        return 0;
-    }
-    else{
-        return 1;
-    }
 
 }
 void removeStudent(vector<Student>& students){
@@ -256,6 +216,7 @@ void removeStudent(vector<Student>& students){
         else{
             students.erase(it);
             cout << "Student removed" << endl;
+            saveStudents(students);
             return;
         }
     }
@@ -366,6 +327,8 @@ void addSubject(vector<Subject>& subjects){
 
     subjects.push_back(sj);
 
+    saveSubjects(subjects);
+
 }
 int generateSubjectId(vector<Subject>& subjects){
 
@@ -410,6 +373,7 @@ void removeSubject(vector<Subject>& subjects){
         else{
             subjects.erase(it);
             cout << "Subject removed" << endl;
+            saveSubjects(subjects);
             return;
         }
     }
@@ -577,11 +541,13 @@ void addGrade(vector<Student>& students, vector<Subject>& subjects){
         }
     }
 
-    Grade g(sjId, score, testDate);
+    Grade g(st->getId(), sjId, testNum, score, testDate);
 
     st->addGrade(*sj, testNum, g);
 
     cout << "Grade assigned" << endl;
+
+    saveGrades(students);
 
 }
 void removeGrade(vector<Student>& students, vector<Subject>& subjects){
@@ -602,6 +568,7 @@ void removeGrade(vector<Student>& students, vector<Subject>& subjects){
 
     if(st->getGrades().empty()){
         cout << st->getName() << " have no grades assigned" << endl;
+        return;
     }
 
     Subject* sj = nullptr;
@@ -609,10 +576,13 @@ void removeGrade(vector<Student>& students, vector<Subject>& subjects){
         return;
     }
 
-    int sjId = sj->getId();
     unordered_map<Subject, map<int, Grade>> stGrades = st->getGrades();
     
     auto sjIt = stGrades.find(*sj);
+    if(sjIt == stGrades.end()){
+        cout << "Subject not assigned to " << st->getName() << endl;
+        return;
+    }
     map<int, Grade> testGrades = sjIt->second;
 
     int testNum;
@@ -635,6 +605,8 @@ void removeGrade(vector<Student>& students, vector<Subject>& subjects){
 
     cout << "Grade removed" << endl;
 
+    saveGrades(students);
+
 }
 void updateGrade(vector<Student>& students, vector<Subject>& subjects){
 
@@ -648,7 +620,7 @@ void updateGrade(vector<Student>& students, vector<Subject>& subjects){
         return;
     }
 
-    Student* st;
+    Student* st = nullptr;
     if(!studentIdInput(students, st)){
         return;
     }
@@ -658,15 +630,18 @@ void updateGrade(vector<Student>& students, vector<Subject>& subjects){
         return;
     }
 
-    Subject* sj;
+    Subject* sj = nullptr;
     if(!subjectIdInput(subjects, sj)){
         return;
     }
 
-    int sjId = sj->getId();
     unordered_map<Subject, map<int, Grade>> stGrades = st->getGrades();
 
     auto sjIt = stGrades.find(*sj);
+    if(sjIt == stGrades.end()){
+        cout << "The student doesn't have any grades assigned for this subject" << endl;
+        return;
+    }
     map<int, Grade> testGrades = sjIt->second;
     if(testGrades.empty()){
         cout << "The student doesn't have any grades assigned for this subject" << endl;
@@ -726,11 +701,13 @@ void updateGrade(vector<Student>& students, vector<Subject>& subjects){
         }
     }
 
-    Grade newGrade(sjId, newScore, newDate);
+    Grade newGrade(st->getId(), sj->getId(), testNum, newScore, newDate);
 
     st->updateGrade(*sj, testNum, newGrade);
 
     cout << "Grade updated" << endl;
+
+    saveGrades(students);
 
 }
 bool studentIdInput(vector<Student>& students, Student*& st){
@@ -1040,7 +1017,7 @@ void showClassReportBySubject(vector<Student>& students, vector<Subject>& subjec
             nStZeroGrades++;
         }
     }
-    if(nStZeroGrades == students.size()){
+    if(nStZeroGrades == (int)students.size()){
         cout << "No student have grades assigned" << endl;
         return;
     }
@@ -1153,10 +1130,15 @@ void showStudentsOverallReport(vector<Student>& students){
             nStWithoutGrades++;
         }
     }
-    if(nStWithoutGrades == students.size()){
+    if(nStWithoutGrades == (int)students.size()){
         cout << "No students have grades assigned" << endl;
         return;
     }
+
+    vector<Student> sorted = students;
+    sort(sorted.begin(), sorted.end(), [](const Student& a, const Student& b){
+        return a.getGeneralAverage() > b.getGeneralAverage();
+    });
 
     cout << string(76, '-') << endl;
     cout << "Students overall:" << endl;
@@ -1171,7 +1153,7 @@ void showStudentsOverallReport(vector<Student>& students){
     double overallAvg = 0;
     int nStWithGrades = 0;
 
-    for(const Student& st: students){
+    for(const Student& st: sorted){
 
         double ovStAvg = st.getGeneralAverage();
         if(ovStAvg < 0) continue;

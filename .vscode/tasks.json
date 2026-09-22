@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build & Run studentGradeMng",
+            "type": "shell",
+            "command": "g++ -std=c++17 -Wall -o main_st_gd_mng.exe main_st_gd_mng.cpp file_manager.cpp grade.cpp student.cpp subject.cpp isValidDate.cpp; if ($?) { .\\main_st_gd_mng.exe }",
+            "options": {
+                "cwd": "${workspaceFolder}/studentGradeMng"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}

@@ -4,6 +4,8 @@
 #include "subject.h"
 #include "student.h"
 #include "grade.h"
+#include "file_manager.h"
+#include "isValidDate.h"
 #include <ctime>
 #include <string>
 #include <regex>
@@ -17,7 +19,6 @@ int mainMenu();
 void studentMngMenu(vector<Student>& students);
 void addStudent(vector<Student>& students);
 int generateStudentId(vector<Student>& students);
-bool isValidDate(string& date);
 void removeStudent(vector<Student>& students);
 void listAllStudents(vector<Student>& students);
 void subjectMngMenu(vector<Subject>& subjects);
