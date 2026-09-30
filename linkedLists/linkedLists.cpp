@@ -282,6 +282,8 @@ void insertAt(Node*& head, Node*& tail, int value, int len){
         temp->prev->next = temp;
         nextNode->prev = temp;
 
+        cout << "New node inserted at index " << index << endl; 
+
     }
 
 }
@@ -303,7 +305,7 @@ int getIndex(int len){
 
         if(index < 0 || index > len){
             cout << "Index out of range" << endl;
-            continue;;
+            continue;
         }
         
         return index;
@@ -327,25 +329,54 @@ bool removeAt(Node*& head, Node*& tail, int len){
         return removeBack(head, tail);
     }
 
-    Node *temp = head;
-    Node *prev = nullptr;
-    int itIndex = 0;
+    if(index < len / 2){
 
-    while(itIndex != index){
-        prev = temp;
-        temp = temp->next;
-        itIndex++;
+        Node *temp = head;
+        int itIndex = 0;
+
+        while(itIndex != index){
+            temp = temp->next;
+            itIndex++;
+        }
+
+        temp->prev->next = temp->next;
+        temp->next->prev = temp->prev;
+
+        delete temp;
+
+        cout << "Node at index " << index << " was deleted" << endl;
+
+        return true;
+
     }
+    else{
 
-    prev->next = temp->next;
-    delete temp;
+        Node *temp = tail;
+        int itIndex = len - 1;
 
-    cout << "Node at index " << index << " deleted" << endl;
+        while(itIndex != index){
+            temp = temp->prev;
+            itIndex--;
+        }
 
-    return true;
+        temp->next->prev = temp->prev;
+        temp->prev->next = temp->next;
+
+        delete temp;
+
+        cout << "Node at index " << index << " was deleted" << endl;
+
+        return true;
+
+    }
 
 }
 Node* find(Node*& head, int value){
+
+    if(head == nullptr){
+        cout << "There are no Nodes" << endl;
+        return nullptr;
+    }
 
     Node *temp = head;
 
