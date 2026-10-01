@@ -8,59 +8,295 @@ struct Node{
     Node *next;
 };
 
+class DoublyLinkedList{
+    private:
+        Node* head;
+        Node* tail;
+        int len;
+    public:
+        int getLen(){
+            return len;
+        }
+        void pushBack(int value){
+
+            len++;
+
+            if(tail == nullptr){
+                tail = new Node{value, nullptr, nullptr};
+                head = tail;
+                return;
+            }
+
+            Node* temp = tail;
+            tail = new Node{value, temp, nullptr};
+            temp->next = tail;
+
+        }
+        void pushFront(int value){
+
+            len++;
+
+            if(head == nullptr){
+                head = new Node{value, nullptr, nullptr};
+                tail = head;
+                return;
+            }
+
+            head = new Node{value, nullptr, head};
+            head->next->prev = head;
+
+        }
+        bool removeBack(){
+
+            if(tail == nullptr){
+                return false;
+            }
+            if(len == 1){
+                delete tail;
+                tail = nullptr;
+                head = nullptr;
+                len--;
+                return true;
+            }
+
+            Node *temp = tail->prev;
+            temp->next = nullptr;
+            delete tail;
+            tail = temp;
+
+            len--;
+
+            return true;
+
+        }
+        bool removeFront(){
+
+            if(head == nullptr){
+                return false;
+            }
+            if(len == 1){
+                delete head;
+                head = nullptr;
+                tail = nullptr;
+                len--;
+                return true;
+            }
+
+            Node *temp = head->next;
+            temp->prev = nullptr;
+            delete head;
+            head = temp;
+
+            len--;
+            
+            return true;
+
+        }
+        void insertAt(int value, int index){
+
+            if(index == 0){
+                cout << "Inserting at index 0" << endl;
+                pushFront(value);
+                return;
+            }
+            if(index == len){
+                cout << "Inserting at the back of the list" << endl;
+                pushBack(value);
+                return;
+            }
+
+            if(index < len / 2){
+
+                Node *temp = head;
+                int itIndex = 0;
+                while(itIndex != index){
+                    temp = temp->next;
+                    itIndex++;
+                }
+
+                temp->prev->next = new Node{value, temp->prev, temp};
+                temp->prev = temp->prev->next;
+
+            }
+            else{
+
+                Node *temp = tail;
+                int itIndex = len - 1;
+                while(itIndex != index){
+                    temp = temp->prev;
+                    itIndex--;
+                }
+
+                temp->prev->next = new Node{value, temp->prev, temp};
+                temp->prev = temp->prev->next;
+
+            }
+
+            len++;
+
+        }
+        bool removeAt(int index){
+
+            if(index == 0){
+                return removeFront();
+            }
+            if(index == len - 1){
+                return removeBack();
+            }
+
+            if(index < len / 2){
+
+                Node *temp = head;
+                int itIndex = 0;
+                while(itIndex != index){
+                    temp = temp->next;
+                    itIndex++;
+                }
+
+                temp->prev->next = temp->next;
+                temp->next->prev = temp->prev;
+                delete temp;
+
+            }
+            else{
+
+                Node *temp = tail;
+                int itIndex = len - 1;
+                while(itIndex != index){
+                    temp = temp->prev;
+                    itIndex--;
+                }
+
+                temp->prev->next = temp->next;
+                temp->next->prev = temp->prev;
+                delete temp;
+
+            }
+
+            len--;
+
+            return true;
+
+        }
+        const Node* find(int value){
+
+            Node *temp = head;
+            while(temp != nullptr && temp->data != value){
+                temp = temp->next;
+            }
+
+            return temp;
+
+        }
+        void printForward(){
+
+            if(head == nullptr){
+                cout << "There are no Nodes" << endl;
+                return;
+            }
+
+            Node *temp = head;
+            cout << "Doubly Linked List:" << endl;
+            int c = 0;
+            while(temp != nullptr){
+                cout << c << ". " << temp->data << endl;
+                temp = temp->next;
+                c++;
+            }
+
+        }
+        void printBackwards(){
+
+            if(tail == nullptr){
+                cout << "There are no Nodes" << endl;
+                return;
+            }
+
+            Node *temp = tail;
+            cout << "Doubly Linked List:" << endl;
+            int c = len - 1;
+            while(temp != nullptr){
+                cout << c << ". " << temp->data << endl;
+                temp = temp->prev;
+                c--;
+            }
+
+        }
+    DoublyLinkedList(){
+        this->head = nullptr;
+        this->tail = nullptr;
+        this->len = 0;
+    }
+    ~DoublyLinkedList(){
+
+        if(head != nullptr){
+
+            Node *temp = head->next;
+            while(temp != nullptr){
+                delete head;
+                head = temp;
+                temp = temp->next;
+            }
+
+            delete head;
+
+        }
+    }
+};
+
 int mainMenu();
 int dataInputMenu();
-void pushBack(Node*& head, Node*& tail, int value);
-void pushFront(Node*& head, Node*& tail, int value);
-bool removeFront(Node*& head, Node*& tail);
-bool removeBack(Node*& head, Node*& tail);
 int getIndex(int len);
-void insertAt(Node*& head, Node*& tail, int value, int len);
-bool removeAt(Node*& head, Node*& tail, int len);
-Node* find(Node*& head, int value);
-void printForward(Node*& head);
-void printBackwards(Node*& tail);
-void clearList(Node*& head, Node*& tail);
 
 int main(){
 
-    Node *head = nullptr;
-    Node *tail = nullptr;
-    int len = 0;
+    DoublyLinkedList myList;
+
     while(true){
     
         int option = mainMenu();
 
         switch(option){
             case 1:
-                pushBack(head, tail, dataInputMenu());
-                len++;
+                myList.pushBack(dataInputMenu());
+                cout << "New node pushed Back" << endl;
                 break;
             case 2:
-                pushFront(head, tail, dataInputMenu());
-                len++;
+                myList.pushFront(dataInputMenu());
+                cout << "New node pushed Front" << endl;
                 break;
             case 3:
-                if(removeFront(head, tail)){
-                    len --;
+                if(myList.removeFront()){
+                    cout << "Front Node deleted" << endl;
+                }
+                else{
+                    cout << "There are no Nodes" << endl;
                 }
                 break;
             case 4:
-                if(removeBack(head, tail)){
-                    len--;
+                if(myList.removeBack()){
+                    cout << "Back Node deleted" << endl;
+                }
+                else{
+                    cout << "There are no Nodes" << endl;
                 }
                 break;
             case 5:
-                insertAt(head, tail, dataInputMenu(), len);
-                len++;
+                myList.insertAt(dataInputMenu(), getIndex(myList.getLen()));
+                cout << "New Node inserted at given index" << endl;
                 break;
             case 6:
-                if(removeAt(head, tail, len)){
-                    len--;
+                if(myList.getLen() > 0){
+                    if(myList.removeAt(getIndex(myList.getLen() - 1))){
+                        cout << "Node deleted at given index" << endl;
+                    }
+                }
+                else{
+                    cout << "There are no Nodes" << endl;
                 }
                 break;
             case 7:
-                {Node* it = find(head, dataInputMenu());
+                {const Node* it = myList.find(dataInputMenu());
                 if(it != nullptr){
                     cout << it->data << endl;
                 }
@@ -69,14 +305,13 @@ int main(){
                 }
                 break;}
             case 8:
-                printForward(head);
+                myList.printForward();
                 break;
             case 9:
-                printBackwards(tail);
+                myList.printBackwards();
                 break;
             case 0:
                 cout << "Exiting..." << endl;
-                clearList(head, tail);
                 return 0;
         }
 
@@ -147,146 +382,6 @@ int dataInputMenu(){
     return value;
 
 }
-void pushBack(Node*& head, Node*& tail, int value){
-
-    if(head == nullptr){
-        head = new Node{value, nullptr, nullptr};
-        tail = head;
-        return;
-    }
-
-    Node *temp = tail;
-
-    tail = new Node{value, temp, nullptr};
-    temp->next = tail;
-
-}
-void pushFront(Node*& head, Node*& tail, int value){
-
-    if(head == nullptr){
-        head = new Node{value, nullptr, nullptr};
-        tail = head;
-        return;
-    }
-
-    Node *temp = head;
-    head = new Node{value, nullptr, temp};
-    temp->prev = head;
-
-}
-bool removeFront(Node*& head, Node*& tail){
-
-    if(head == nullptr){
-        cout << "There are no Nodes" << endl;
-        return false;
-    }
-    if(head == tail){
-        delete head;
-        head = nullptr;
-        tail = nullptr;
-        cout << "Front Node deleted" << endl;
-        return true;
-    }
-
-    Node *temp = head->next;
-
-    delete head;
-
-    temp->prev = nullptr;
-    head = temp;
-
-    cout << "Front Node deleted" << endl;
-
-    return true;
-
-}
-bool removeBack(Node*& head, Node*& tail){
-
-    if(head == nullptr){
-        cout << "There are no Nodes" << endl;
-        return false;
-    }
-    if(head == tail){
-        delete head;
-        head = nullptr;
-        tail = nullptr;
-        cout << "Back Node deleted" << endl;
-        return true;
-    }
-
-    Node *temp = tail->prev;
-    temp->next = nullptr;
-    
-    delete tail;
-
-    tail = temp;
-
-    cout << "Back Node deleted" << endl;
-
-    return true;
-
-}
-void insertAt(Node*& head, Node*& tail, int value, int len){
-
-    if(head == nullptr){
-        pushFront(head, tail, value);
-        cout << "List is empty, new node inserted at index 0" << endl;
-        return;
-    }
-
-    int index = getIndex(len);
-
-    if(index == 0){
-        pushFront(head, tail, value);
-        cout << "New node inserted at index 0" << endl;
-        return;
-    }
-    if(index == len){
-        pushBack(head, tail, value);
-        cout << "New node inserted at index " << index << endl;
-        return;
-    }
-
-    if(index < len / 2){
-
-        Node *temp = head;
-        Node *prevNode = nullptr;
-        int itIndex = 0;
-
-        while(itIndex != index){
-            prevNode = temp;
-            temp = temp->next;
-            itIndex++;
-        }
-
-        temp = new Node{value, prevNode, temp};
-        temp->next->prev = temp;
-        prevNode->next = temp;
-
-        cout << "New node inserted at index " << index << endl; 
-
-    }
-    else{
-
-        Node *temp = tail;
-        Node *nextNode = nullptr;
-        int itIndex = len;
-
-        while(itIndex != index){
-            nextNode = temp;
-            temp = temp->prev;
-            itIndex--;
-        }
-
-        temp = new Node{value, temp, nextNode};
-        temp->prev->next = temp;
-        nextNode->prev = temp;
-
-        cout << "New node inserted at index " << index << endl; 
-
-    }
-
-}
 int getIndex(int len){
 
     int index;
@@ -311,127 +406,5 @@ int getIndex(int len){
         return index;
 
     }
-
-}
-bool removeAt(Node*& head, Node*& tail, int len){
-
-    if(head == nullptr){
-        cout << "There are no Nodes" << endl;
-        return false;
-    }
-
-    int index = getIndex(len - 1);
-
-    if(index == 0){
-        return removeFront(head, tail);
-    }
-    if(index == len - 1){
-        return removeBack(head, tail);
-    }
-
-    if(index < len / 2){
-
-        Node *temp = head;
-        int itIndex = 0;
-
-        while(itIndex != index){
-            temp = temp->next;
-            itIndex++;
-        }
-
-        temp->prev->next = temp->next;
-        temp->next->prev = temp->prev;
-
-        delete temp;
-
-        cout << "Node at index " << index << " was deleted" << endl;
-
-        return true;
-
-    }
-    else{
-
-        Node *temp = tail;
-        int itIndex = len - 1;
-
-        while(itIndex != index){
-            temp = temp->prev;
-            itIndex--;
-        }
-
-        temp->next->prev = temp->prev;
-        temp->prev->next = temp->next;
-
-        delete temp;
-
-        cout << "Node at index " << index << " was deleted" << endl;
-
-        return true;
-
-    }
-
-}
-Node* find(Node*& head, int value){
-
-    if(head == nullptr){
-        cout << "There are no Nodes" << endl;
-        return nullptr;
-    }
-
-    Node *temp = head;
-
-    while(temp != nullptr && temp->data != value){
-        temp = temp->next;
-    }
-
-    return temp;
-
-}
-void printForward(Node*& head){
-
-    if(head == nullptr){
-        cout << "There are no Nodes" << endl;
-        return;
-    }
-
-    Node *temp = head;
-
-    while(temp != nullptr){
-        cout << temp->data << endl;
-        temp = temp->next;
-    }
-
-}
-void printBackwards(Node*& tail){
-
-    if(tail == nullptr){
-        cout << "There are no Nodes" << endl;
-        return;
-    }
-
-    Node *temp = tail;
-
-    while(temp != nullptr){
-        cout << temp->data << endl;
-        temp = temp->prev;
-    }
-
-}
-void clearList(Node*& head, Node*& tail){
-
-    if(head == nullptr){
-        return;
-    }
-
-    Node *temp = head->next;
-    while(temp != nullptr){
-        delete head;
-        head = temp;
-        temp = temp->next;
-    }
-
-    delete head;
-    head = nullptr;
-    tail = nullptr;
 
 }
